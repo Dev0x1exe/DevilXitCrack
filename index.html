@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charSet="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&family=Tajawal:wght@400;500;700&display=swap"/>
+<title>USER PANEL — PRIME WIRE</title>
+<meta name="theme-color" content="#0b0606"/>
+<meta name="description" content="PRIME WIRE User Panel"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Chakra Petch', system-ui, sans-serif;
+    background: #0b0606;
+    color: #e8e6e3;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; z-index: -10; pointer-events: none;
+    background-image: linear-gradient(rgba(255,60,60,.06) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,60,60,.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: .6;
+  }
+  .glow-top {
+    position: fixed; top: -10rem; left: 50%; transform: translateX(-50%);
+    z-index: -10; width: 48rem; height: 24rem; border-radius: 999px;
+    background: rgba(255,40,40,.18); filter: blur(120px); pointer-events: none;
+  }
+  header {
+    position: sticky; top: 0; z-index: 40;
+    border-bottom: 1px solid rgba(255,60,60,.25);
+    background: rgba(11,6,6,.85); backdrop-filter: blur(20px);
+  }
+  .header-inner {
+    max-width: 72rem; margin: 0 auto; height: 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: 0 1rem;
+  }
+  .logo { display: inline-flex; align-items: center; gap: .625rem; text-decoration: none; color: inherit; }
+  .logo svg { width: 2.25rem; height: 2.25rem; color: #ff3b3b; }
+  .logo-text { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.25rem; }
+  .logo-text .neon { color: #ff3b3b; text-shadow: 0 0 8px rgba(255,59,59,.9), 0 0 20px rgba(255,59,59,.5); }
+  nav { display: flex; gap: .5rem; }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: .5rem; height: 2.25rem;
+    padding: 0 1.25rem; border-radius: .375rem; text-decoration: none;
+    font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: .75rem;
+    letter-spacing: .18em; transition: all .3s; cursor: pointer; border: none;
+  }
+  .nav-btn.active { background: #ff3b3b; color: #0b0606; box-shadow: 0 0 20px rgba(255,59,59,.7); }
+  .nav-btn.ghost {
+    border: 1px solid rgba(255,59,59,.7); background: rgba(255,59,59,.05); color: #ff6b6b;
+  }
+  .nav-btn.ghost:hover { background: rgba(255,59,59,.15); box-shadow: 0 0 15px rgba(255,59,59,.5); }
+  main { max-width: 64rem; margin: 0 auto; padding: 2.5rem 1rem; }
+  .page-title { text-align: center; margin-bottom: 2rem; }
+  .page-title .kicker { font-family: 'Orbitron', sans-serif; font-size: .625rem; letter-spacing: .5em; color: #8a8580; }
+  .page-title h1 { font-family: 'Orbitron', sans-serif; font-size: 2.25rem; font-weight: 900; margin-top: .5rem; }
+  .page-title h1 .neon { color: #ff3b3b; text-shadow: 0 0 10px rgba(255,59,59,.9); }
+  .grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .panel {
+    position: relative; overflow: hidden; padding: 1.25rem;
+    border: 1px solid rgba(255,60,60,.25); border-radius: .5rem;
+    background: rgba(20,10,10,.6);
+    transition: all .5s;
+  }
+  .panel.on { border-color: rgba(255,59,59,.9); box-shadow: 0 0 25px rgba(255,59,59,.4); }
+  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; }
+  .panel-head .kicker { font-family: 'Orbitron', sans-serif; font-size: .625rem; letter-spacing: .35em; color: #8a8580; }
+  .panel-head h3 { font-family: 'Orbitron', sans-serif; font-size: 1.25rem; font-weight: 900; margin-top: .25rem; }
+  .panel-head p[dir="rtl"] { font-family: 'Tajawal', sans-serif; font-size: .875rem; color: #8a8580; margin-top: .25rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .375rem;
+    padding: .25rem .5rem; border-radius: .125rem; border: 1px solid rgba(255,60,60,.35);
+    font-family: 'Orbitron', sans-serif; font-size: .625rem; letter-spacing: .2em;
+    color: #8a8580; white-space: nowrap;
+  }
+  .badge.on { border-color: #ff3b3b; color: #ff6b6b; box-shadow: 0 0 10px rgba(255,59,59,.4); }
+  .visual {
+    margin: 1rem 0; height: 9rem; border-radius: .375rem;
+    border: 1px solid rgba(255,60,60,.2); background: rgba(0,0,0,.5);
+    position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .visual::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,59,59,.04) 2px, rgba(255,59,59,.04) 4px);
+  }
+  .circle-outer, .circle-inner {
+    position: absolute; border-radius: 999px;
+    border: 1px solid rgba(255,60,60,.3); transition: all .5s;
+  }
+  .circle-outer { width: 7rem; height: 7rem; }
+  .circle-inner { width: 4rem; height: 4rem; border-width: 2px; }
+  .panel.on .circle-outer { border-color: #ff3b3b; box-shadow: 0 0 20px rgba(255,59,59,.5); }
+  .panel.on .circle-inner { border-color: #ff3b3b; }
+  .crosshair { color: rgba(255,60,60,.4); transition: all .5s; }
+  .panel.on .crosshair { color: #ff3b3b; filter: drop-shadow(0 0 8px rgba(255,59,59,.8)); }
+  .radar { position: relative; width: 7rem; height: 7rem; border-radius: 999px; border: 1px solid rgba(255,60,60,.3); transition: all .5s; }
+  .radar .r1 { position: absolute; inset: 22%; border-radius: 999px; border: 1px solid rgba(255,59,59,.25); }
+  .radar .r2 { position: absolute; inset: 44%; border-radius: 999px; border: 1px solid rgba(255,59,59,.25); }
+  .radar .v { position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background: rgba(255,59,59,.2); }
+  .radar .h { position: absolute; top: 50%; left: 0; height: 1px; width: 100%; background: rgba(255,59,59,.2); }
+  .radar .sweep {
+    position: absolute; inset: 0; border-radius: 999px; opacity: 0;
+    background: conic-gradient(from 0deg, rgba(255,59,59,.5), transparent 60deg);
+    transition: opacity .3s;
+  }
+  .panel.on .radar .sweep { opacity: 1; animation: sweep 2s linear infinite; }
+  .panel.on .radar { border-color: #ff3b3b; box-shadow: 0 0 20px rgba(255,59,59,.5); }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  .toggle {
+    position: relative; width: 100%; height: 3.5rem; cursor: pointer;
+    border: 1px solid rgba(255,60,60,.25); border-radius: .375rem;
+    background: transparent; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+    font-family: 'Orbitron', sans-serif; font-size: .875rem; font-weight: 700; letter-spacing: .3em;
+    transition: all .3s;
+  }
+  .toggle:hover { border-color: rgba(255,59,59,.6); }
+  .toggle .slide {
+    position: absolute; top: 0; bottom: 0; width: 50%;
+    background: #ff3b3b; opacity: .25; transition: transform .3s ease-out;
+    transform: translateX(0);
+  }
+  .toggle.on .slide { transform: translateX(100%); opacity: .55; box-shadow: 0 0 20px rgba(255,59,59,.7); }
+  .toggle span { position: relative; z-index: 1; align-self: center; }
+  .toggle span.off-label { color: #e8e6e3; }
+  .toggle span.on-label { color: #8a8580; }
+  .toggle.on span.off-label { color: #8a8580; }
+  .toggle.on span.on-label { color: #fff; text-shadow: 0 0 8px #ff3b3b; }
+  .status-bar {
+    max-width: 36rem; margin: 2.5rem auto 0; padding: 1.25rem;
+    border: 1px solid rgba(255,59,59,.4); border-radius: .5rem;
+    background: rgba(20,10,10,.6); text-align: center;
+  }
+  .status-bar h4 { font-family: 'Orbitron', sans-serif; font-size: .75rem; letter-spacing: .3em; color: #8a8580; margin-bottom: .5rem; }
+  .status-bar p { font-family: 'Tajawal', sans-serif; font-size: .875rem; color: #e8e6e3; }
+  .status-bar .state { color: #ff6b6b; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: .2em; }
+  footer {
+    border-top: 1px solid rgba(255,60,60,.2); padding: 2rem 1rem; margin-top: 3rem;
+  }
+  .footer-inner {
+    max-width: 72rem; margin: 0 auto; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between; gap: .75rem;
+    font-size: .75rem; color: #8a8580;
+  }
+  @media (min-width: 640px) { .footer-inner { flex-direction: row; } }
+  .footer-inner .tag { font-family: 'Orbitron', sans-serif; letter-spacing: .3em; }
+  .footer-inner a { color: #4bb3ff; text-decoration: none; font-family: 'Orbitron', sans-serif; letter-spacing: .2em; }
+  .footer-inner a:hover { text-decoration: underline; }
+  .hud-corner::before, .hud-corner::after {
+    content: ""; position: absolute; width: 1rem; height: 1rem; border-color: #ff3b3b; border-style: solid;
+  }
+  .hud-corner::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+  .hud-corner::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="glow-top"></div>
+
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo" aria-label="PRIME WIRE home">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <filter id="pw-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g filter="url(#pw-glow)" fill="none" stroke="currentColor" stroke-linejoin="round">
+          <path d="M32 3 57 17.5v29L32 61 7 46.5v-29Z" stroke-width="2.5"/>
+          <path d="M32 10 51 21v22L32 54 13 43V21Z" stroke-width="1" opacity="0.45"/>
+          <path d="M24 46V19h11a8 8 0 0 1 0 16H24" stroke-width="4" stroke-linecap="round"/>
+          <path d="M43 27h7M50 27v-6" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="24" cy="46" r="2.6" fill="currentColor" stroke="none"/>
+          <circle cx="50" cy="21" r="2" fill="currentColor" stroke="none"/>
+        </g>
+      </svg>
+      <span class="logo-text"><span>PRIME</span> <span class="neon">WIRE</span></span>
+    </a>
+    <nav>
+      <a class="nav-btn active" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        USER
+      </a>
+      <a class="nav-btn ghost" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        ADMIN
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">
+    <p class="kicker">USER PANEL</p>
+    <h1>USER <span class="neon">CONTROL</span></h1>
+  </div>
+
+  <div class="grid">
+    <!-- AIM POINT -->
+    <div class="panel hud-corner" id="panelAim">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">TARGET LOCK</p>
+          <h3>AIM POINT</h3>
+          <p dir="rtl">نقطة تصويب ذكية تثبت على الهدف.</p>
+        </div>
+        <span class="badge" id="badgeAim">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          OFF
+        </span>
+      </div>
+      <div class="visual">
+        <div class="circle-outer"></div>
+        <div class="circle-inner"></div>
+        <svg class="crosshair" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="22" x2="18" y1="12" y2="12"/>
+          <line x1="6" x2="2" y1="12" y2="12"/>
+          <line x1="12" x2="12" y1="6" y2="2"/>
+          <line x1="12" x2="12" y1="22" y2="18"/>
+        </svg>
+      </div>
+      <button class="toggle" id="toggleAim" type="button" aria-checked="false" role="switch" aria-label="AIM POINT">
+        <span class="slide"></span>
+        <span class="off-label">OFF</span>
+        <span class="on-label">ON</span>
+      </button>
+    </div>
+
+    <!-- ESP MOCO -->
+    <div class="panel hud-corner" id="panelEsp">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">MOCO MARK</p>
+          <h3>ESP MOCO</h3>
+          <p dir="rtl">رادار وتحديد مواقع الأعداء بإطارات.</p>
+        </div>
+        <span class="badge" id="badgeEsp">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          OFF
+        </span>
+      </div>
+      <div class="visual">
+        <div class="radar">
+          <div class="r1"></div>
+          <div class="r2"></div>
+          <div class="v"></div>
+          <div class="h"></div>
+          <div class="sweep"></div>
+          <svg style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#ff3b3b;" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/>
+            <path d="M4 6h.01"/>
+            <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/>
+            <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/>
+            <path d="M12 18h.01"/>
+            <path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/>
+            <circle cx="12" cy="12" r="2"/>
+            <path d="m13.41 10.59 5.66-5.66"/>
+          </svg>
+        </div>
+      </div>
+      <button class="toggle" id="toggleEsp" type="button" aria-checked="false" role="switch" aria-label="ESP MOCO">
+        <span class="slide"></span>
+        <span class="off-label">OFF</span>
+        <span class="on-label">ON</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <h4>SYSTEM STATUS</h4>
+    <p>الأدوات تعمل بشكل مباشر — <span class="state" id="globalState">IDLE</span></p>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span class="tag">PRIME WIRE © 2026</span>
+    <a href="https://t.me/yaakoob_xit" target="_blank" rel="noreferrer">TELEGRAM @yaakoob_xit</a>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    const panels = {
+      aim: {
+        panel: document.getElementById('panelAim'),
+        toggle: document.getElementById('toggleAim'),
+        badge: document.getElementById('badgeAim'),
+        on: false
+      },
+      esp: {
+        panel: document.getElementById('panelEsp'),
+        toggle: document.getElementById('toggleEsp'),
+        badge: document.getElementById('badgeEsp'),
+        on: false
+      }
+    };
+    const globalState = document.getElementById('globalState');
+
+    function updateGlobal() {
+      const aim = panels.aim.on, esp = panels.esp.on;
+      if (aim && esp) globalState.textContent = 'ALL ACTIVE';
+      else if (aim) globalState.textContent = 'AIM POINT ON';
+      else if (esp) globalState.textContent = 'ESP MOCO ON';
+      else globalState.textContent = 'IDLE';
+    }
+
+    function render(key) {
+      const p = panels[key];
+      p.panel.classList.toggle('on', p.on);
+      p.toggle.classList.toggle('on', p.on);
+      p.toggle.setAttribute('aria-checked', p.on ? 'true' : 'false');
+      if (p.on) {
+        p.badge.classList.add('on');
+        p.badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" style="display:none"/><path d="m9 12 2 2 4-4"/></svg> ACTIVE';
+      } else {
+        p.badge.classList.remove('on');
+        p.badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> OFF';
+      }
+      updateGlobal();
+    }
+
+    function bind(key) {
+      panels[key].toggle.addEventListener('click', function () {
+        panels[key].on = !panels[key].on;
+        render(key);
+      });
+    }
+
+    bind('aim');
+    bind('esp');
+    render('aim');
+    render('esp');
+  })();
+</script>
+</body>
+</html>
